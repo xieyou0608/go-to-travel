@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-center gap-x-40 flex-wrap">
     <div class="bg-gray-200 p-10 rounded-xl">
-      <form action="" class="flex flex-col gap-y-3">
+      <form @submit.prevent="submitForm" class="flex flex-col gap-y-3">
         <input
           type="text"
           v-model="newTripName"
@@ -35,10 +35,11 @@
     </div> -->
   </div>
 </template>
+
 <script>
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
-
+import { createTrip } from "../api";
 export default {
   components: { Datepicker },
   data() {
@@ -47,12 +48,23 @@ export default {
       dates: [],
     };
   },
-  //   computed: {
-  //     sortedDates() {
-  //       console.log(this.dates);
-  //       return [...this.dates].sort((a, b) => a - b);
-  //     },
-  //   },
+  computed: {
+    sortedDates() {
+      return [...this.dates].sort((a, b) => a - b);
+    },
+  },
+  methods: {
+    async submitForm() {
+      try {
+        const res = await createTrip(this.newTripName, this.sortedDates);
+        const tripId = res.data.name;
+        this.$router.push("/trip/" + tripId);
+      } catch (err) {
+        alert(err.message);
+      }
+    },
+  },
 };
 </script>
+
 <style lang=""></style>

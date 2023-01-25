@@ -39,10 +39,10 @@ booking.com、樂活
 
 ## backend API
 ##### POST /api/trip
-新增一個
+新增一個活動
 
 ##### GET /api/trip
-
+取得活動資料
 
 
 ##### GET /api/crawling/:bnb_url
