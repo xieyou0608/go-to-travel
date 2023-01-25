@@ -19,20 +19,6 @@
         <button>新增</button>
       </form>
     </div>
-    <!-- <div>
-      <ul>
-        <li v-for="date in sortedDates">
-          {{
-            new Intl.DateTimeFormat("zh-tw", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              weekday: "short",
-            }).format(date)
-          }}
-        </li>
-      </ul>
-    </div> -->
   </div>
 </template>
 
@@ -49,14 +35,16 @@ export default {
     };
   },
   computed: {
-    sortedDates() {
-      return [...this.dates].sort((a, b) => a - b);
+    transformedDates() {
+      return [...this.dates]
+        .sort((a, b) => a - b)
+        .map((date) => date.toJSON().split("T")[0]);
     },
   },
   methods: {
     async submitForm() {
       try {
-        const res = await createTrip(this.newTripName, this.sortedDates);
+        const res = await createTrip(this.newTripName, this.transformedDates);
         const tripId = res.data.name;
         this.$router.push("/trip/" + tripId);
       } catch (err) {

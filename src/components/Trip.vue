@@ -2,7 +2,16 @@
   <div>trip page {{ tripName }}</div>
   <div>
     trip date
-    <p v-for="date in availableDates">{{ date }}</p>
+    <p v-for="date in availableDates">
+      {{
+        new Intl.DateTimeFormat("zh-tw", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          weekday: "short",
+        }).format(new Date(date))
+      }}
+    </p>
   </div>
 </template>
 <script>
