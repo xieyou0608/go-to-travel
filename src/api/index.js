@@ -5,16 +5,29 @@ const FIREBASE_URL =
 
 const tripRequest = axios.create({ baseURL: FIREBASE_URL });
 
-// axios 會自動轉換 date 成 UTC string
-const createTrip = (tripName, availableDates) => {
+export const createTrip = (tripName, availableDates) => {
   return tripRequest.post("trip.json", {
     tripName,
     availableDates,
   });
 };
 
-const getTrip = (tripId) => {
+export const getTrip = (tripId) => {
   return tripRequest.get(`trip/${tripId}.json`);
 };
 
-export { createTrip, getTrip };
+export const patchNewMember = (tripId, userName, availableDates) => {
+  const datesVote = {};
+  availableDates.forEach((date) => {
+    datesVote[date] = "";
+  });
+  return tripRequest.patch(`trip/${tripId}/members.json`, {
+    [userName]: { datesVote },
+  });
+};
+
+export const patchMyVote = (tripId, userName, myVote) => {
+  return tripRequest.patch(`trip/${tripId}/members/${userName}.json`, {
+    datesVote: myVote,
+  });
+};

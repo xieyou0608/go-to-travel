@@ -34,6 +34,7 @@ npm install && npm run dev
 4. 從 booking.com、樂活爬蟲
 5. 投票時要回答所有日期才能提交
 6. 不提供排行程功能，市面上已經有很多可用的 app
+7. 日期不提供增減，若想改動日期要直接新增一個新的 trip
 
 ## Realtime Database 資料庫格式
 ```javascript
@@ -44,11 +45,11 @@ npm install && npm run dev
             availableDates: string[], //["2023-01-25",...]
             bnb: string[],
             members: {
-                $userId:{
-                    username: string,
-                    votes:{
-                        "2023-01-25": "circle",
-                        "2023-01-26": "cross",
+                $userName:{
+                    datesVote:{
+                        "2023-01-25": "O",
+                        "2023-01-26": "A",
+                        "2023-01-27": "X",
                     }
                 }[]
             },
