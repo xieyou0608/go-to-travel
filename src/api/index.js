@@ -32,6 +32,12 @@ export const patchMyVote = (tripId, userName, myVote) => {
   });
 };
 
+export const patchBnbInfo = (tripId, bnbName, bnbInfo) => {
+  return tripRequest.patch(`trip/${tripId}/bnbs.json`, {
+    [bnbName]: bnbInfo,
+  });
+};
+
 const GOTO_API = "https://goto-api.vercel.app/api";
 const TWSTAY_CRAWLER_API = GOTO_API + "/twstay";
 

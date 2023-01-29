@@ -1,5 +1,11 @@
 <script>
-import { getTrip, patchNewMember, patchMyVote, getAvailableRoom } from "../api";
+import {
+  getTrip,
+  patchNewMember,
+  patchMyVote,
+  getAvailableRoom,
+  patchBnbInfo,
+} from "../api";
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 export default {
@@ -36,6 +42,7 @@ export default {
           tripInfo.tripName = tripData.tripName;
           tripInfo.availableDates = tripData.availableDates || [];
           tripInfo.members = tripData.members || {};
+          tripInfo.bnbs = tripData.bnbs || {};
         } else {
           throw new Error("資料不存在");
         }
@@ -109,32 +116,45 @@ export default {
       "https://twstay.com/RWD2/booking.aspx?BNB=shenzhou&OrderType=2"
     );
 
-    const bnbCrawl = () => {
+    const bnbCrawl = async () => {
       tripInfo.bnbs[bnbName.value] = {};
       tripInfo.bnbs[bnbName.value].url = bnbUrl.value;
       tripInfo.bnbs[bnbName.value].rooms = {};
-      tripInfo.availableDates.forEach(async (date) => {
-        tripInfo.bnbs[bnbName.value].rooms[date] = [];
-        try {
-          const twstayDate = new Date(date).toLocaleDateString();
-          const res = await getAvailableRoom(bnbUrl.value, twstayDate);
-          const data = res.data;
-          data.forEach((room) => {
-            const roomInfo = {};
-            roomInfo.roomTitle = room.roomTitle;
-            if (room.hasNoRoom) {
-              roomInfo.roomStatus = "沒有空房";
-            } else {
-              roomInfo.roomStatus =
-                room.roomPrice + "元" + room.roomRemain + "間";
-            }
-            tripInfo.bnbs[bnbName.value].rooms[date].push(roomInfo);
-          });
-          console.log(tripInfo.bnbs);
-        } catch (err) {
-          console.log(err);
-        }
-      });
+      await Promise.all(
+        tripInfo.availableDates.map(async (date) => {
+          tripInfo.bnbs[bnbName.value].rooms[date] = [];
+          try {
+            const twstayDate = new Date(date).toLocaleDateString();
+            const res = await getAvailableRoom(bnbUrl.value, twstayDate);
+            const data = res.data;
+            data.forEach((room) => {
+              const roomInfo = {};
+              roomInfo.roomTitle = room.roomTitle;
+              if (room.hasNoRoom) {
+                roomInfo.roomStatus = "沒有空房";
+              } else {
+                roomInfo.roomStatus =
+                  room.roomPrice + "元" + room.roomRemain + "間";
+              }
+              tripInfo.bnbs[bnbName.value].rooms[date].push(roomInfo);
+            });
+            console.log(tripInfo.bnbs);
+          } catch (err) {
+            console.log(err);
+          }
+        })
+      );
+      addNewBnb(bnbName.value, tripInfo.bnbs[bnbName.value]);
+    };
+
+    const addNewBnb = async (newBnbName, newBnbInfo) => {
+      console.log(newBnbInfo);
+      try {
+        const res = await patchBnbInfo(tripId, newBnbName, newBnbInfo);
+        console.log(res);
+      } catch (err) {
+        console.log(err);
+      }
     };
 
     return {

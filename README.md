@@ -103,3 +103,7 @@ votes: {
     .
 }
 ```
+
+## Ref
+Await in a forEach loop https://zellwk.com/blog/async-await-in-loops/  
+結論: 不要在 forEach 裡用 await，但使用 for loop 太慢了，date 是用 key 存在 bnb 裡，所以可以用 map 加上 Promise.all 處理
