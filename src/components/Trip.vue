@@ -1,5 +1,5 @@
 <script>
-import { getTrip, patchNewMember, patchMyVote } from "../api";
+import { getTrip, patchNewMember, patchMyVote, getAvailableRoom } from "../api";
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 export default {
@@ -15,13 +15,36 @@ export default {
       tripName: "",
       availableDates: [],
       members: {},
+      bnbs: {},
       memberList: computed(() => {
         return Object.keys(tripInfo.members).map((key) => ({
           userName: key,
           datesVote: tripInfo.members[key].datesVote,
         }));
       }),
+      bnbList: computed(() => {
+        return Object.keys(tripInfo.bnbs);
+      }),
     });
+
+    onMounted(async () => {
+      try {
+        const res = await getTrip(tripId);
+        if (res.data) {
+          console.log(res.data);
+          const tripData = res.data;
+          tripInfo.tripName = tripData.tripName;
+          tripInfo.availableDates = tripData.availableDates || [];
+          tripInfo.members = tripData.members || {};
+        } else {
+          throw new Error("資料不存在");
+        }
+      } catch (err) {
+        alert(err.message);
+        router.push("/");
+      }
+    });
+
     const datesPoll = computed(() => {
       const result = {};
       tripInfo.availableDates.forEach((date) => {
@@ -81,23 +104,39 @@ export default {
       }
     };
 
-    onMounted(async () => {
-      try {
-        const res = await getTrip(tripId);
-        if (res.data) {
-          console.log(res.data);
-          const tripData = res.data;
-          tripInfo.tripName = tripData.tripName;
-          tripInfo.availableDates = tripData.availableDates || [];
-          tripInfo.members = tripData.members || {};
-        } else {
-          throw new Error("資料不存在");
+    const bnbName = ref("宜蘭深圳驛站");
+    const bnbUrl = ref(
+      "https://twstay.com/RWD2/booking.aspx?BNB=shenzhou&OrderType=2"
+    );
+
+    const bnbCrawl = () => {
+      tripInfo.bnbs[bnbName.value] = {};
+      tripInfo.bnbs[bnbName.value].url = bnbUrl.value;
+      tripInfo.bnbs[bnbName.value].rooms = {};
+      tripInfo.availableDates.forEach(async (date) => {
+        tripInfo.bnbs[bnbName.value].rooms[date] = [];
+        try {
+          const twstayDate = new Date(date).toLocaleDateString();
+          const res = await getAvailableRoom(bnbUrl.value, twstayDate);
+          const data = res.data;
+          data.forEach((room) => {
+            const roomInfo = {};
+            roomInfo.roomTitle = room.roomTitle;
+            if (room.hasNoRoom) {
+              roomInfo.roomStatus = "沒有空房";
+            } else {
+              roomInfo.roomStatus =
+                room.roomPrice + "元" + room.roomRemain + "間";
+            }
+            tripInfo.bnbs[bnbName.value].rooms[date].push(roomInfo);
+          });
+          console.log(tripInfo.bnbs);
+        } catch (err) {
+          console.log(err);
         }
-      } catch (err) {
-        alert(err.message);
-        router.push("/");
-      }
-    });
+      });
+    };
+
     return {
       isLogin,
       userName,
@@ -109,6 +148,9 @@ export default {
       tripInfo,
       datesPoll,
       submitVote,
+      bnbCrawl,
+      bnbName,
+      bnbUrl,
     };
   },
 };
@@ -116,7 +158,8 @@ export default {
 
 <template lang="">
   <h4>{{ tripInfo.tripName }}</h4>
-  <div class="flex justify-around w-full min-h-[50vh]">
+  <div class="flex justify-around w-full min-h-[30vh]">
+    <!-- 出遊成員 -->
     <div id="members" class="bg-gray-200 p-2 w-[30vw]">
       <div v-if="!isLogin" class="p-2 bg-white m-1">
         <form @submit.prevent="submitName">
@@ -137,18 +180,29 @@ export default {
         <div class="">{{ member.userName }}</div>
       </div>
     </div>
-    <div id="dates" class="bg-gray-200 p-2 w-[30vw]">
+    <!-- 新增民宿 -->
+    <div id="bnb" class="bg-gray-200 p-2 w-[30vw]">
+      <input type="text" v-model="bnbName" required />
+      <input type="text" v-model="bnbUrl" required />
+      <button @click="bnbCrawl()">搜尋</button>
+    </div>
+  </div>
+  <div class="flex justify-around w-full min-h-[50vh]">
+    <!-- 日期投票 -->
+    <div id="dates" class="bg-gray-200 p-2 w-[90vw]">
       <div
         v-for="date in tripInfo.availableDates"
         class="flex items-center justify-between p-2 bg-white m-1"
       >
-        {{
-          new Intl.DateTimeFormat("zh-tw", {
-            month: "long",
-            day: "numeric",
-            weekday: "short",
-          }).format(new Date(date))
-        }}
+        <div>
+          {{
+            new Intl.DateTimeFormat("zh-tw", {
+              month: "long",
+              day: "numeric",
+              weekday: "short",
+            }).format(new Date(date))
+          }}
+        </div>
         <div v-if="isEditing" class="flex items-center gap-x-2">
           <button
             @click="voteDate(date, 'O')"
@@ -201,6 +255,13 @@ export default {
           {{ datesPoll[date].A }}
           <font-awesome-icon icon="fa-solid fa-xmark" />
           {{ datesPoll[date].X }}
+        </div>
+        <div v-for="bnbName in tripInfo.bnbList">
+          {{ bnbName }}
+          <p v-for="room in tripInfo.bnbs[bnbName].rooms[date]">
+            {{ room.roomTitle }}
+            {{ room.roomStatus }}
+          </p>
         </div>
       </div>
       <button class="p-2" v-if="!isEditing && isLogin" @click="handleEditing()">

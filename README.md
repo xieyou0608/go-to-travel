@@ -1,10 +1,11 @@
 # Go To Travel
-1. 輸入房間之後就可以顯示房間可訂時間
-2. 核心概念是共享想去的民宿的日期狀態
+後端 API(Node.js 爬蟲) https://github.com/xieyou0608/goto-api  
+1. 結合日期投票、民宿投票、匯集民宿訂房資訊
+2. 輸入民宿後可顯示每一天的空房諮詢
+2. 核心概念是顯示所有想去的民宿的日期狀態
 3. 以 when2meet 為模型
-4. 結合日期投票、民宿投票、匯集民宿訂房資訊
 
-**重要：在日期及人數及地點皆未定的情況下使用**  
+**重要：在日期、人數、地點皆未定的情況下使用**  
 若有其中兩項確定→直接用 booking.com 等訂房網即可
 
 ## Getting Start
@@ -22,28 +23,42 @@ npm install && npm run dev
 1. 開一個旅遊頁面
 2. 日期投票 (跟 Line 一樣有圈叉跟三角形)
 3. 民宿投票
-4. 填入訂房網網址，python 爬蟲爬可訂房時間跟可訂房人數來顯示
-5. 傳網址給其他人
-6. local storage 存 recent trip 
-
+4. 填入訂房網網址，後端會爬空房資訊
+5. 以網址分享給其他人
 
 ## 其他
 1. 在側邊攔顯示基本資訊
-2. 適合程度高的用深色 (跟 when2meet 一樣)
 3. 只實作 2 天 1 夜，並且以要住的那天(第一天)為主，因為需求就是跑去玩一天  
-4. 從 booking.com、樂活爬蟲
-5. 投票時要回答所有日期才能提交
+4. 從 booking.com、樂活宜蘭民宿網爬蟲
 6. 不提供排行程功能，市面上已經有很多可用的 app
 7. 日期不提供增減，若想改動日期要直接新增一個新的 trip
+6. local storage 存 recent trip 
 
 ## Realtime Database 資料庫格式
 ```javascript
 {
     trip:{
         $tripId:{
-            tripName: string,
-            availableDates: string[], //["2023-01-25",...]
-            bnb: string[],
+            tripName: "來去宜蘭",
+            availableDates: ["2023-01-25",...]
+            bnbs: {
+                $bnbName: {
+                    bnbUrl: "https://twstay.com/RWD2/booking.aspx?BNB=shenzhou&OrderType=2",
+                    rooms:{
+                        "2023-01-25":[
+                            {
+                                roomTitle: "4~8人包棟(二房)",
+                                roomStatus: "15000 元 1 間"
+                            },
+                            {
+                                roomTitle: "6~10人包棟(三房)",
+                                roomStatus: "沒有空房"
+                            }
+                        ],
+                        "2023-01-26":...
+                    }
+                }
+            },
             members: {
                 $userName:{
                     datesVote:{
@@ -51,7 +66,7 @@ npm install && npm run dev
                         "2023-01-26": "A",
                         "2023-01-27": "X",
                     }
-                }[]
+                }
             },
         }
     }
@@ -88,12 +103,3 @@ votes: {
     .
 }
 ```
-## backend API
-##### POST /api/trip
-新增一個活動
-
-##### GET /api/trip
-取得活動資料
-
-##### GET /api/crawling/:bnb_url?from={date}&to={date}
-爬取一間旅館在特定時間是否有空房

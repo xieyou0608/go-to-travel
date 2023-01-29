@@ -31,3 +31,13 @@ export const patchMyVote = (tripId, userName, myVote) => {
     datesVote: myVote,
   });
 };
+
+const GOTO_API = "https://goto-api.vercel.app/api";
+const TWSTAY_CRAWLER_API = GOTO_API + "/twstay";
+
+export const getAvailableRoom = (bnb_url, date) => {
+  return axios.post(TWSTAY_CRAWLER_API, {
+    bnb_url,
+    date,
+  });
+};
