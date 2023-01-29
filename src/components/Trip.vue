@@ -177,42 +177,92 @@ export default {
 </script>
 
 <template lang="">
-  <h4>{{ tripInfo.tripName }}</h4>
-  <div class="flex justify-around w-full min-h-[30vh]">
+  <div class="w-[90vw] min-h-[80vh] flex flex-col gap-y-3">
     <!-- 出遊成員 -->
-    <div id="members" class="bg-gray-200 p-2 w-[30vw]">
-      <div v-if="!isLogin" class="p-2 bg-white m-1">
-        <form @submit.prevent="submitName">
+    <h4 class="">{{ tripInfo.tripName }}</h4>
+    <div id="members" class="bg-gray-200 p-2 flex w-full">
+      <div v-if="!isLogin" class="p-2 w-full">
+        <form
+          @submit.prevent="submitName"
+          class="flex flex-col gap-y-4 lg:flex-row"
+        >
           <input
             type="text"
             v-model="userName"
             placeholder="請輸入名字"
             required
+            class="border-gray-300 border-2 p-2 w-full lg:w-auto"
           />
-          <button>確認</button>
+          <button class="bg-green-300 rounded-xl py-2 px-5 ml-3">確認</button>
         </form>
       </div>
-
-      <div
-        v-for="member in tripInfo.memberList"
-        class="flex items-center justify-between p-2 bg-white m-1"
-      >
-        <div class="">{{ member.userName }}</div>
+      <div v-else class="flex">
+        <div
+          v-for="member in tripInfo.memberList"
+          class="p-2 bg-white m-1 rounded-xl"
+        >
+          {{ member.userName }}
+        </div>
       </div>
     </div>
+
     <!-- 新增民宿 -->
-    <div id="bnb" class="bg-gray-200 p-2 w-[30vw]">
-      <input type="text" v-model="bnbName" required />
-      <input type="text" v-model="bnbUrl" required />
-      <button @click="bnbCrawl()">搜尋</button>
+    <h5>新增民宿</h5>
+    <div id="bnb" class="bg-gray-200 p-3 w-full flex gap-x-3 justify-between">
+      <div class="bg-gray-200 flex gap-x-3 w-full">
+        <div class="flex flex-col gap-y-1 w-3/5">
+          <span>
+            您可以從
+            <a
+              class="text-blue-800"
+              href="https://yilantravel.com.tw/"
+              target="_blank"
+              rel="noreferrer noopenner"
+              >樂活宜蘭民宿網</a
+            >
+            選擇民宿，並將訂房頁面的網址貼入
+          </span>
+          <input
+            type="text"
+            v-model="bnbName"
+            required
+            class="w-full border-gray-300 border-2"
+          />
+          <input
+            type="text"
+            v-model="bnbUrl"
+            required
+            class="w-full border-gray-300 border-2"
+          />
+        </div>
+        <button @click="bnbCrawl()" class="bg-blue-300 rounded-xl px-3">
+          新增民宿
+        </button>
+      </div>
     </div>
-  </div>
-  <div class="flex justify-around w-full min-h-[50vh]">
-    <!-- 日期投票 -->
-    <div id="dates" class="bg-gray-200 p-2 w-[90vw]">
+
+    <!-- 下方投票結果 -->
+    <div class="flex items-center gap-x-2">
+      <h5>日期及民宿狀況</h5>
+      <button
+        class="bg-green-300 rounded-xl py-3 px-4"
+        v-if="!isEditing && isLogin"
+        @click="handleEditing()"
+      >
+        日期投票
+      </button>
+      <button
+        class="bg-green-300 rounded-xl py-3 px-4"
+        v-if="isEditing"
+        @click="submitVote()"
+      >
+        完成投票
+      </button>
+    </div>
+    <div id="dates" class="bg-gray-200 p-2 w-full flex-grow">
       <div
         v-for="date in tripInfo.availableDates"
-        class="flex items-center justify-between p-2 bg-white m-1"
+        class="flex items-center justify-between p-2 bg-white m-1 overflow-auto gap-x-5"
       >
         <div>
           {{
@@ -276,7 +326,7 @@ export default {
           <font-awesome-icon icon="fa-solid fa-xmark" />
           {{ datesPoll[date].X }}
         </div>
-        <div v-for="bnbName in tripInfo.bnbList">
+        <div v-for="bnbName in tripInfo.bnbList" class="min-w-[20vw]">
           {{ bnbName }}
           <p v-for="room in tripInfo.bnbs[bnbName].rooms[date]">
             {{ room.roomTitle }}
@@ -284,10 +334,6 @@ export default {
           </p>
         </div>
       </div>
-      <button class="p-2" v-if="!isEditing && isLogin" @click="handleEditing()">
-        編輯
-      </button>
-      <button class="p-2" v-if="isEditing" @click="submitVote()">完成</button>
     </div>
   </div>
 </template>
