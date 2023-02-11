@@ -3,7 +3,7 @@ import {
   getTrip,
   patchNewMember,
   patchMyVote,
-  getAvailableRoom,
+  getAvailableRooms,
   patchBnbInfo,
 } from "../api";
 import { ref, reactive, onMounted, computed } from "vue";
@@ -72,44 +72,17 @@ const submitName = async (inputName) => {
   }
 };
 
-const bnbCrawl = async (bnbName, bnbUrl) => {
-  tripInfo.bnbs[bnbName] = {};
-  tripInfo.bnbs[bnbName].url = bnbUrl;
-  tripInfo.bnbs[bnbName].rooms = {};
-  await Promise.all(
-    tripInfo.availableDates.map(async (date) => {
-      tripInfo.bnbs[bnbName].rooms[date] = [];
-      try {
-        const twstayDate = new Date(date).toLocaleDateString();
-        const res = await getAvailableRoom(bnbUrl, twstayDate);
-        const data = res.data;
-        data.forEach((room) => {
-          const roomInfo = {};
-          roomInfo.roomTitle = room.roomTitle;
-          if (room.hasNoRoom) {
-            roomInfo.roomStatus = "沒有空房";
-          } else {
-            roomInfo.roomStatus =
-              room.roomPrice + "元" + room.roomRemain + "間";
-          }
-          tripInfo.bnbs[bnbName].rooms[date].push(roomInfo);
-        });
-        console.log(tripInfo.bnbs);
-      } catch (err) {
-        console.log(err);
-      }
-    })
-  );
-  addNewBnb(bnbName, tripInfo.bnbs[bnbName]);
-};
-
-const addNewBnb = async (newBnbName, newBnbInfo) => {
-  console.log(newBnbInfo);
+const bnbCrawl = async (bnbId) => {
   try {
-    const res = await patchBnbInfo(tripId, newBnbName, newBnbInfo);
-    console.log(res);
-  } catch (err) {
-    console.log(err);
+    if (bnbId in tripInfo.bnbs) {
+      tripInfo.bnbs[bnbId].rooms = null;
+    }
+    const res = await getAvailableRooms(bnbId, tripInfo.availableDates);
+    tripInfo.bnbs[bnbId] = res.data;
+
+    await patchBnbInfo(tripId, bnbId, tripInfo.bnbs[bnbId]);
+  } catch (error) {
+    console.log(error);
   }
 };
 

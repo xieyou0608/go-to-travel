@@ -107,12 +107,15 @@ const datesPoll = computed(() => {
         {{ datesPoll[date].X }}
       </div>
 
-      <div v-for="bnbName in tripInfo.bnbList" class="min-w-[20vw]">
-        {{ bnbName }}
-        <p v-for="room in tripInfo.bnbs[bnbName].rooms[date]">
-          {{ room.roomTitle }}
-          {{ room.roomStatus }}
-        </p>
+      <div v-for="bnbId in tripInfo.bnbList" class="min-w-[20vw]">
+        {{ tripInfo.bnbs[bnbId].name }}
+        <div v-if="tripInfo.bnbs[bnbId].rooms">
+          <p v-for="room in tripInfo.bnbs[bnbId].rooms[date]">
+            {{ room.roomTitle }}
+            {{ room.roomStatus }}
+          </p>
+        </div>
+        <div v-else>正在搜尋...</div>
       </div>
     </div>
   </div>

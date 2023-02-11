@@ -1,10 +1,16 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 defineEmits(["bnbCrawl"]);
-const bnbName = ref("宜蘭深圳驛站");
-const bnbUrl = ref(
-  "https://twstay.com/RWD2/booking.aspx?BNB=shenzhou&OrderType=2"
-);
+const bnbUrl = ref("https://twstay.com/RWD2/index.aspx?bnb=memorycastle");
+
+const getBnbIdFromUrl = (inputUrl) => {
+  const parsedUrl = new URL(inputUrl.toLowerCase());
+  return parsedUrl.searchParams.get("bnb");
+};
+
+const bnbId = computed(() => {
+  return getBnbIdFromUrl(bnbUrl.value);
+});
 </script>
 
 <template>
@@ -28,22 +34,16 @@ const bnbUrl = ref(
         </span>
         <input
           type="text"
-          v-model="bnbName"
-          required
-          class="w-full border-gray-300 border-2"
-        />
-        <input
-          type="text"
           v-model="bnbUrl"
           required
           class="w-full border-gray-300 border-2"
         />
       </div>
       <button
-        @click="$emit('bnbCrawl', bnbName, bnbUrl)"
+        @click="$emit('bnbCrawl', bnbId)"
         class="bg-blue-300 rounded-xl px-3"
       >
-        新增民宿
+        搜尋空房
       </button>
     </div>
   </div>

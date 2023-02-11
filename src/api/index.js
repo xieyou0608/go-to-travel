@@ -38,12 +38,14 @@ export const patchBnbInfo = (tripId, bnbName, bnbInfo) => {
   });
 };
 
-const GOTO_API = "https://goto-api.vercel.app/api";
-const TWSTAY_CRAWLER_API = GOTO_API + "/twstay";
+// const GOTO_API = "https://goto-api.vercel.app/api";
+const GOTO_API = "http://localhost:3000/api";
 
-export const getAvailableRoom = (bnb_url, date) => {
-  return axios.post(TWSTAY_CRAWLER_API, {
-    bnb_url,
-    date,
+export const getAvailableRooms = (bnbId, dates, bnbName) => {
+  const apiUrl = GOTO_API + `/twstay/${bnbId}/rooms`;
+  return axios.post(apiUrl, {
+    bnbId,
+    dates,
+    bnbName,
   });
 };
