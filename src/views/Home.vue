@@ -24,7 +24,8 @@ export default {
         if (this.dates.length === 0) {
           throw new Error("請選擇至少一天");
         }
-        const tripId = res.data.name;
+        console.log(res);
+        const tripId = res.data.mongoId;
         this.$router.push("/trip/" + tripId);
       } catch (err) {
         alert(err.message);

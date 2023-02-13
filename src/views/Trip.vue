@@ -1,11 +1,5 @@
 <script setup>
-import {
-  getTrip,
-  patchNewMember,
-  patchMyVote,
-  getAvailableRooms,
-  patchBnbInfo,
-} from "../api";
+import { getTrip, addNewMember, updateMyVote, addNewBnb } from "../api";
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Members from "../components/Members.vue";
@@ -35,6 +29,7 @@ const tripInfo = reactive({
 onMounted(async () => {
   try {
     const res = await getTrip(tripId);
+    console.log(res);
     if (res.data) {
       console.log(res.data);
       const tripData = res.data;
@@ -57,11 +52,7 @@ const submitName = async (inputName) => {
     isLogin.value = true;
   } else {
     try {
-      const res = await patchNewMember(
-        tripId,
-        username.value,
-        tripInfo.availableDates
-      );
+      const res = await addNewMember(tripId, username.value);
       console.log(res.data);
       isLogin.value = true;
       tripInfo.members = { ...tripInfo.members, ...res.data };
@@ -77,10 +68,8 @@ const bnbCrawl = async (bnbId) => {
     if (bnbId in tripInfo.bnbs) {
       tripInfo.bnbs[bnbId].rooms = null;
     }
-    const res = await getAvailableRooms(bnbId, tripInfo.availableDates);
+    const res = await addNewBnb(tripId, bnbId, tripInfo.availableDates);
     tripInfo.bnbs[bnbId] = res.data;
-
-    await patchBnbInfo(tripId, bnbId, tripInfo.bnbs[bnbId]);
   } catch (error) {
     console.log(error);
   }
@@ -88,7 +77,7 @@ const bnbCrawl = async (bnbId) => {
 
 const submitVote = async (myVote) => {
   try {
-    const res = await patchMyVote(tripId, username.value, myVote);
+    const res = await updateMyVote(tripId, username.value, myVote);
     console.log(res);
     tripInfo.members[username.value].datesVote = myVote;
   } catch (err) {
