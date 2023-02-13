@@ -2,8 +2,8 @@ import axios from "axios";
 
 // const GOTO_API = "https://goto-api.vercel.app/api/";
 // const GOTO_API = "http://localhost:3000/api/";
-const GOTO_API =
-  "http://ec2-52-194-232-161.ap-northeast-1.compute.amazonaws.com/api/";
+const GOTO_API = "https://www.goto-travel.life/api/";
+
 const tripAxios = axios.create({ baseURL: GOTO_API });
 
 export const createTrip = (tripName, availableDates) => {
