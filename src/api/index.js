@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const GOTO_API = "https://goto-api.vercel.app/api/";
-// const GOTO_API = "http://localhost:3000/api/";
+// const GOTO_API = "http://localhost:80/api/";
 const GOTO_API = "https://www.goto-travel.life/api/";
 
 const tripAxios = axios.create({ baseURL: GOTO_API });
@@ -23,8 +23,8 @@ export const addNewMember = (tripId, username) => {
   });
 };
 
-export const updateMyVote = (tripId, userName, myVote) => {
-  return tripAxios.patch(`trip/${tripId}/members/${userName}`, {
+export const updateMyVote = (tripId, username, myVote) => {
+  return tripAxios.patch(`trip/${tripId}/members/${username}`, {
     datesVote: myVote,
   });
 };
